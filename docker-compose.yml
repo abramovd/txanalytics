@@ -1,0 +1,25 @@
+# This compose file is intended only for local dev usage.
+version: "3.4"
+services:
+  api:
+    build:
+      context: .
+      dockerfile: docker/api/Dockerfile
+      target: local
+    ports:
+      - "8022:8000"
+    environment:
+      - DATASETS_DIR=/tx_api/datasets/
+    volumes:
+      - ./api/:/tx_api/app/
+      - ./datasets/:/tx_api/datasets/
+  datagenerator:
+    build:
+      context: .
+      dockerfile: docker/datagenerator/Dockerfile
+      target: local
+    environment:
+      - DATASETS_DIR=/tx_datagenerator/datasets/
+    volumes:
+      - ./datagenerator/:/tx_datagenerator/app/
+      - ./datasets/:/tx_datagenerator/datasets/
