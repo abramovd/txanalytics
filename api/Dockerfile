@@ -2,18 +2,18 @@ FROM python:3-alpine AS base
 
 RUN apk update && apk add --no-cache build-base tzdata
 
-RUN adduser -S tx_api
+RUN adduser -S api
 
-COPY /requirements/api /tx_api/requirements
+COPY /api/requirements /requirements
 
-WORKDIR /tx_api
+WORKDIR /api
 
 RUN pip config set global.index-url "https://pypi.python.org/simple"
 RUN pip install dumb-init==1.2.2
-RUN pip install -r /tx_api/requirements/main.txt
+RUN pip install -r /requirements/main.txt
 
 FROM base as app
-COPY api /tx_api/app
+COPY api/app /app
 
 FROM app AS release
 
@@ -26,11 +26,11 @@ FROM release AS dev-base
 RUN apk add --no-cache bash
 
 FROM dev-base As local
-USER tx_api
-CMD ["uvicorn", "app.main:app", "--reload", "--host=0.0.0.0", "--port=8000"]
+USER api
+CMD ["uvicorn", "main:app", "--reload", "--host=0.0.0.0", "--port=8000"]
 
 FROM dev-base as test-base
-USER tx_api
-RUN pip install -r /tx_api/requirements/test.txt --no-deps
+USER api
+RUN pip install -r /requirements/test.txt --no-deps
 CMD ["pytest"]
 

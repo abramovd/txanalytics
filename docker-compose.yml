@@ -4,22 +4,28 @@ services:
   api:
     build:
       context: .
-      dockerfile: docker/api/Dockerfile
+      dockerfile: api/Dockerfile
       target: local
     ports:
       - "8022:8000"
     environment:
-      - DATASETS_DIR=/tx_api/datasets/
+      - DATASETS_DIR=/api/datasets/
     volumes:
-      - ./api/:/tx_api/app/
-      - ./datasets/:/tx_api/datasets/
+      - ./api/app/:/api/app/
+      - ./datasets/:/api/datasets/
   datagenerator:
     build:
       context: .
-      dockerfile: docker/datagenerator/Dockerfile
+      dockerfile: datagenerator/Dockerfile
       target: local
     environment:
       - DATASETS_DIR=/tx_datagenerator/datasets/
     volumes:
-      - ./datagenerator/:/tx_datagenerator/app/
-      - ./datasets/:/tx_datagenerator/datasets/
+      - ./datagenerator/app/:/datagenerator/app/
+      - ./datasets/:/datagenerator/datasets/
+  notebook:
+    build:
+      context: .
+      dockerfile: notebook/Dockerfile
+    volumes:
+      - ./notebook/work:/notebook/work/

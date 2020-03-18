@@ -126,3 +126,7 @@ dmypy.json
 junit.xml
 cobertura.xml
 
+
+notebook/work/
+!notebook/work/template.json
+

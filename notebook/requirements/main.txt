@@ -5,13 +5,24 @@
 #    ./compile_requirements.sh
 #
 appnope==0.1.0            # via ipykernel, ipython
-attrs==19.3.0             # via jsonschema
+attrs==19.3.0             # via automat, jsonschema, service-identity, twisted
+automat==20.2.0           # via twisted
 backcall==0.1.0           # via ipython
 bleach==3.1.1             # via nbconvert
+certifi==2019.11.28       # via requests
+cffi==1.14.0              # via cryptography
+chardet==3.0.4            # via requests
+constantly==15.1.0        # via twisted
+cryptography==2.8         # via pyopenssl, scrapy, service-identity
+cssselect==1.1.0          # via parsel, scrapy
+cycler==0.10.0            # via matplotlib
 decorator==4.4.2          # via ipython, traitlets
 defusedxml==0.6.0         # via nbconvert
 entrypoints==0.3          # via nbconvert
+hyperlink==19.0.0         # via twisted
+idna==2.9                 # via hyperlink, requests
 importlib-metadata==1.5.0  # via jsonschema
+incremental==17.5.0       # via twisted
 ipykernel==5.1.4          # via notebook
 ipython-genutils==0.2.0   # via nbformat, notebook, traitlets
 ipython==7.13.0           # via ipykernel
@@ -20,31 +31,54 @@ jinja2==2.11.1            # via nbconvert, notebook
 jsonschema==3.2.0         # via nbformat
 jupyter-client==6.0.0     # via ipykernel, notebook
 jupyter-core==4.6.3       # via jupyter-client, nbconvert, nbformat, notebook
+kiwisolver==1.1.0         # via matplotlib
+lxml==4.5.0               # via parsel, scrapy
 markupsafe==1.1.1         # via jinja2
+matplotlib==3.2.0         # via -r requirements/main.in
 mistune==0.8.4            # via nbconvert
 nbconvert==5.6.1          # via notebook
 nbformat==5.0.4           # via nbconvert, notebook
-notebook==6.0.3           # via -r requirements/notebook/main.in
+notebook==6.0.3           # via -r requirements/main.in
+numpy==1.18.2             # via matplotlib, pandas
+pandas==1.0.2             # via -r requirements/main.in
 pandocfilters==1.4.2      # via nbconvert
+parsel==1.5.2             # via scrapy
 parso==0.6.2              # via jedi
 pexpect==4.8.0            # via ipython
 pickleshare==0.7.5        # via ipython
 prometheus-client==0.7.1  # via notebook
 prompt-toolkit==3.0.4     # via ipython
+protego==0.1.16           # via scrapy
 ptyprocess==0.6.0         # via pexpect, terminado
+pyasn1-modules==0.2.8     # via service-identity
+pyasn1==0.4.8             # via pyasn1-modules, service-identity
+pycparser==2.20           # via cffi
+pydispatcher==2.0.5       # via scrapy
 pygments==2.6.1           # via ipython, nbconvert
+pyhamcrest==2.0.2         # via twisted
+pyopenssl==19.1.0         # via scrapy
+pyparsing==2.4.6          # via matplotlib
 pyrsistent==0.15.7        # via jsonschema
-python-dateutil==2.8.1    # via jupyter-client
+python-dateutil==2.8.1    # via jupyter-client, matplotlib, pandas
+pytz==2019.3              # via pandas
 pyzmq==19.0.0             # via jupyter-client, notebook
+queuelib==1.5.0           # via scrapy
+requests==2.23.0          # via -r requirements/main.in
+scrapy==2.0.0             # via -r requirements/main.in
 send2trash==1.5.0         # via notebook
-six==1.14.0               # via bleach, jsonschema, pyrsistent, python-dateutil, traitlets
+service-identity==18.1.0  # via scrapy
+six==1.14.0               # via automat, bleach, cryptography, cycler, jsonschema, parsel, protego, pyopenssl, pyrsistent, python-dateutil, traitlets, w3lib
 terminado==0.8.3          # via notebook
 testpath==0.4.4           # via nbconvert
 tornado==6.0.4            # via ipykernel, jupyter-client, notebook, terminado
 traitlets==4.3.3          # via ipykernel, ipython, jupyter-client, jupyter-core, nbconvert, nbformat, notebook
+twisted==19.10.0          # via scrapy
+urllib3==1.25.8           # via requests
+w3lib==1.21.0             # via parsel, scrapy
 wcwidth==0.1.8            # via prompt-toolkit
 webencodings==0.5.1       # via bleach
 zipp==3.1.0               # via importlib-metadata
+zope.interface==4.7.2     # via scrapy, twisted
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
