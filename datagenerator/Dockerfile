@@ -13,6 +13,7 @@ RUN pip install dumb-init==1.2.2
 RUN pip install -r /requirements/main.txt
 
 FROM base as app
+COPY datasets /datasets
 COPY datagenerator/app /app
 
 FROM app AS release
