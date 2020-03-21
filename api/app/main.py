@@ -4,6 +4,13 @@ from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import Response
 
+from config import (
+    DEBUG, ALLOWED_ORIGINS
+)
+from routers import transactions
+from storages import initialize_users_storage
+from storages import initialize_transactions_storage
+
 
 app = FastAPI(
     title='txanalytics-api',
@@ -11,10 +18,20 @@ app = FastAPI(
     version='0.01'
 )
 app.add_middleware(
-    CORSMiddleware, allow_methods=['OPTIONS', 'GET', 'POST'],
-    allow_origins=['*'], allow_headers=['*'],
+    CORSMiddleware, allow_methods=['OPTIONS', 'GET', ],
+    allow_origins=ALLOWED_ORIGINS,
 )
-app.debug = True
+app.debug = DEBUG
+app.include_router(
+    transactions.router,
+    prefix='/api/v1/transactions'
+)
+
+
+@app.on_event("startup")
+async def startup_event():
+    initialize_users_storage()
+    initialize_transactions_storage()
 
 
 @app.get('/health_check')

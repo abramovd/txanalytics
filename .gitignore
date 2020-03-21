@@ -126,6 +126,8 @@ dmypy.json
 junit.xml
 cobertura.xml
 
+# shelve data
+*.dat
 
 notebook/work/*
 datasets/*
