@@ -38,4 +38,12 @@ TransactionType = namedtuple(
     OnlineStorePurchase='online_store_purchase',
 )
 
-NUM_ACCOUNTS = 100
+DEFAULT_NUM_ACCOUNTS = 100
+DEFAULT_RANDOM_SEED = 123
+Output = namedtuple(
+    'Output',
+    ['Stdout', 'Dump'],
+)(
+    Stdout='stdout',
+    Dump='dump',
+)

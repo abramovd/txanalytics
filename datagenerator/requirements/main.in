@@ -1,2 +1,3 @@
 factory_boy
 pydantic
+click

@@ -1,57 +1,113 @@
+import json
+import os
+import datetime
+import time
+import click
+
 from typing import List
 
-from factory.random import randgen
+from factory.random import randgen, reseed_random
 
 from .factories import (
-    AttachmentFactory, AccountFactory, TransactionFactory,
-    get_attachment_added_at,
+    AccountFactory, TransactionFactory,
 )
-from .constants import NUM_ACCOUNTS
+from .constants import Output
 from .models import (
-    Attachment, Account, Transaction,
+    Account, Transaction,
 )
 from .distributions import (
-    ATTACHMENT_COUNT_PER_TRANSACTION,
     TRANSACTIONS_PER_ACCOUNT_TIER,
 )
+from .utils import PydanticJSONEncoder
 
 
-# TODO: move to post generation?
-def generate_attachments(for_transaction) -> List[Attachment]:
-    count = ATTACHMENT_COUNT_PER_TRANSACTION.flip()
-    attachments = []
-    for _ in range(count):
-        attachment = AttachmentFactory.build(
-            added_at=get_attachment_added_at(for_transaction),
+class Generator(object):
+    def __init__(self, num_accounts: int, output: str,
+                 random_seed: int, dump_path: str,
+                 ):
+        self.num_accounts = num_accounts
+        self.output = output
+        self.random_seed = random_seed
+        if self.output == Output.Dump:
+            self.dump_path = os.path.join(dump_path, self._get_filename())
+        else:
+            self.dump_path = None
+
+    def _get_filename(self) -> str:
+        now_str = datetime.datetime.now().isoformat(timespec='seconds')
+        return f'{self.num_accounts}_{self.random_seed}_{now_str}.json'
+
+    @staticmethod
+    def generate_accounts(count: int) -> List[Account]:
+        for _ in range(count):
+            yield AccountFactory.build()
+
+    @staticmethod
+    def _generate_transactions_for_accounts(
+            account: Account,
+    ) -> List[Transaction]:
+        count_from, count_to = TRANSACTIONS_PER_ACCOUNT_TIER.flip()
+        count = randgen.randint(count_from, count_to)
+
+        transactions = TransactionFactory.build_batch(
+            count, account=account,
         )
-        attachments.append(attachment)
-    return attachments
 
+        return transactions
 
-def generate_accounts(count) -> List[Account]:
-    return AccountFactory.build_batch(count)
+    def generate_transactions(
+            self, accounts: List[Account],
+    ) -> List[Transaction]:
+        transactions = []
 
+        with click.progressbar(
+                accounts, label='Generating Transactions',
+                length=self.num_accounts,
+        ) as bar:
+            for account in bar:
+                transactions += \
+                    self._generate_transactions_for_accounts(account)
 
-def generate_transactions(for_account: Account) -> List[Transaction]:
-    count_from, count_to = TRANSACTIONS_PER_ACCOUNT_TIER.flip()
-    count = randgen.randint(count_from, count_to)
+        return transactions
 
-    transactions = TransactionFactory.build_batch(count, account=for_account)
-    for transaction in transactions:
-        transaction.attachments = generate_attachments(transaction)
+    def dump_transactions(self, transactions: List[Transaction]) -> None:
+        result = json.dumps(
+            transactions, indent=4, sort_keys=True, cls=PydanticJSONEncoder,
+        )
+        if self.output == Output.Stdout:
+            print(result)
+        elif self.output == Output.Dump:
+            with open(self.dump_path, 'w') as f:
+                f.write(result)
+        else:
+            raise ValueError('Not supported output value')
 
-    return transactions
+    def _print_summary(self, transactions: List, seconds_spent: float) -> None:
+        print('Summary:')
+        print(f'Total Accounts: {self.num_accounts}')
+        print(f'Total Transactions: {len(transactions)}')
+        print(f'Random seed: {self.random_seed}')
 
+        output_value = self.output
+        if self.output == Output.Dump:
+            output_value += ' to ' + self.dump_path
 
-def generate():
-    # TODO: dump to datasets based on env variable path
-    transactions = []
-    accounts = generate_accounts(NUM_ACCOUNTS)
-    for account in accounts:
-        transactions += generate_transactions(account)
+        print(f'Data output: {output_value}')
+        print(f'Time spent: {datetime.timedelta(seconds=seconds_spent)}')
 
-    transactions = sorted(transactions, key=lambda tx: tx.timestamp)
-    for transaction in transactions:
-        print(transaction.dict())
-        print('----')
-    print(len(transactions))
+    def run(self, print_summary: bool = True) -> None:
+        start_time = time.time()
+        reseed_random(self.random_seed)
+
+        accounts = self.generate_accounts(self.num_accounts)
+
+        transactions = self.generate_transactions(accounts)
+        transactions = sorted(transactions, key=lambda tx: tx.timestamp)
+
+        self.dump_transactions(transactions)
+
+        end_time = time.time()
+        if print_summary:
+            self._print_summary(
+                transactions, seconds_spent=end_time - start_time,
+            )

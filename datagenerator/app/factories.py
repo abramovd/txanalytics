@@ -14,10 +14,11 @@ from .distributions import (
     TRANSACTION_DIRECTION, TRANSACTION_TYPE,
     TRANSACTIONS_AMOUNT_TIER,
     ATTACHMENT_ADDED_SECONDS_AFTER_TRANSACTION_TIER,
+    ATTACHMENT_COUNT_PER_TRANSACTION,
 )
 
 
-def get_attachment_added_at(transaction: Transaction):
+def get_attachment_added_at(transaction: Transaction) -> FuzzyDateTime:
     low_sec, high_sec = \
         ATTACHMENT_ADDED_SECONDS_AFTER_TRANSACTION_TIER.flip()
     seconds = FuzzyInteger(low_sec, high_sec).fuzz()
@@ -66,5 +67,16 @@ class TransactionFactory(factory.Factory):
     )
     direction = FuzzyDistributedChoice(TRANSACTION_DIRECTION)
     type = FuzzyDistributedChoice(TRANSACTION_TYPE)
+
+    @factory.post_generation
+    def generate_attachments(transaction, create, extracted, **kwargs):
+        count = ATTACHMENT_COUNT_PER_TRANSACTION.flip()
+        attachments = []
+        for _ in range(count):
+            attachment = AttachmentFactory.build(
+                added_at=get_attachment_added_at(transaction),
+            )
+            attachments.append(attachment)
+        return attachments
 
     # TODO: vat_rate, category
