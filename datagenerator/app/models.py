@@ -27,7 +27,7 @@ class Category(BaseModel):
 
 
 class Transaction(BaseModel):
-    id = uuid.UUID
+    id: uuid.UUID
 
     account: Account
 
