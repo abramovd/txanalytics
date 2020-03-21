@@ -14,8 +14,12 @@ from storages import initialize_transactions_storage
 
 app = FastAPI(
     title='txanalytics-api',
-    description='txanalytics-api app.',
-    version='0.01'
+    version='1.0',
+    description='''
+    This is an API documentation for listing banking transactions that happened 
+    on different payment accounts during the last 2 years. 
+    ''',
+
 )
 app.add_middleware(
     CORSMiddleware, allow_methods=['OPTIONS', 'GET', ],

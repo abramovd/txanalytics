@@ -10,4 +10,4 @@ SECRET_KEY = config('SECRET_KEY', cast=Secret, default='test_secret')
 LOCAL_PORT = config('LOCAL_PORT', default=8022)
 DATASET_FILE_PATH = config('DATASET_FILE_PATH')
 USERS_DB_FILE_PATH = config('USERS_DB_FILE_PATH')
-DEFAULT_PAGE_LIMIT = 100
+DEFAULT_PAGE_LIMIT = config('DEFAULT_PAGE_LIMIT', cast=int, default=1000)

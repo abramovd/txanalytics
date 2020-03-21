@@ -1,4 +1,4 @@
-FROM python:3-alpine AS base
+FROM python:3.7-alpine AS base
 
 RUN apk update && apk add --no-cache build-base tzdata libffi-dev libxml2-dev libxslt-dev
 
