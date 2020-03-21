@@ -127,6 +127,7 @@ junit.xml
 cobertura.xml
 
 
-notebook/work/
-!notebook/work/template.json
-
+notebook/work/*
+datasets/*
+!datasets/*_final.json
+!notebook/work/template.ipynb
