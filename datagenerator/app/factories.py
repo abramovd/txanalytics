@@ -77,6 +77,7 @@ class TransactionFactory(factory.Factory):
                 added_at=get_attachment_added_at(transaction),
             )
             attachments.append(attachment)
+        transaction.attachments = attachments
         return attachments
 
     # TODO: vat_rate, category
