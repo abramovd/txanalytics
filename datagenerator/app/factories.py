@@ -1,31 +1,55 @@
 import uuid
+import datetime
 import factory
 
-from datetime import timedelta
+from decimal import Decimal
+
+from dateutil.relativedelta import relativedelta
 from factory.fuzzy import FuzzyDateTime, FuzzyDecimal, FuzzyInteger
 
 from .fuzzy import FuzzyDistributedChoice
 from .models import (
     Attachment, Category, Account, Transaction,
 )
-from .constants import START_DATE, END_DATE
+from .constants import END_DATE, Direction
 from .distributions import (
     ATTACHMENT_FORMAT, ATTACHMENT_ACTIVE,
     TRANSACTION_DIRECTION, TRANSACTION_TYPE,
     TRANSACTIONS_AMOUNT_TIER,
     ATTACHMENT_ADDED_SECONDS_AFTER_TRANSACTION_TIER,
     ATTACHMENT_COUNT_PER_TRANSACTION,
+    ACCOUNT_CREATE_YEAR_MONTH,
 )
 
 
-def get_attachment_added_at(transaction: Transaction) -> FuzzyDateTime:
+def get_attachment_added_at(transaction: Transaction) -> datetime.datetime:
     low_sec, high_sec = \
         ATTACHMENT_ADDED_SECONDS_AFTER_TRANSACTION_TIER.flip()
     seconds = FuzzyInteger(low_sec, high_sec).fuzz()
     return FuzzyDateTime(
         start_dt=transaction.timestamp,
-        end_dt=transaction.timestamp + timedelta(seconds=seconds)
+        end_dt=transaction.timestamp + datetime.timedelta(seconds=seconds)
+    ).fuzz()
+
+
+def get_account_created_at() -> datetime.datetime:
+    year, month = ACCOUNT_CREATE_YEAR_MONTH.flip()
+    start_dt = datetime.datetime(
+        year=year, month=month, day=1,
+        tzinfo=datetime.timezone.utc,
     )
+    return FuzzyDateTime(
+        start_dt=start_dt, end_dt=start_dt + relativedelta(months=1)
+    ).fuzz()
+
+
+def get_transaction_amount(force_high=None) -> Decimal:
+    low, high = TRANSACTIONS_AMOUNT_TIER.flip()
+
+    force_high = high or force_high
+    high = max(high, force_high)
+    low = min(low, high)
+    return FuzzyDecimal(low=low, high=high).fuzz()
 
 
 class AttachmentFactory(factory.Factory):
@@ -47,12 +71,7 @@ class AccountFactory(factory.Factory):
 
     id = factory.LazyFunction(uuid.uuid4)
     name = factory.Faker('company')
-    created_at = FuzzyDateTime(start_dt=START_DATE, end_dt=END_DATE)
-
-
-def get_transaction_amount():
-    low, high = TRANSACTIONS_AMOUNT_TIER.flip()
-    return FuzzyDecimal(low=low, high=high).fuzz()
+    created_at = factory.LazyFunction(get_account_created_at)
 
 
 class TransactionFactory(factory.Factory):
@@ -66,6 +85,9 @@ class TransactionFactory(factory.Factory):
             start_dt=o.account.created_at, end_dt=END_DATE).fuzz()
     )
     direction = FuzzyDistributedChoice(TRANSACTION_DIRECTION)
+
+    # TODO: type and direction should be correlated,
+    # e.g. TopUp and OnlineStorePurchase should be only Inbound
     type = FuzzyDistributedChoice(TRANSACTION_TYPE)
 
     @factory.post_generation

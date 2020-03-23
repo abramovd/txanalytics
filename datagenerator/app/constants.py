@@ -2,12 +2,8 @@ import datetime
 
 from collections import namedtuple
 
-START_DATE = datetime.datetime(
-    year=2018, month=1, day=1,
-    tzinfo=datetime.timezone.utc,
-)
 END_DATE = datetime.datetime(
-    year=2020, month=3, day=1,
+    year=2020, month=1, day=1,
     tzinfo=datetime.timezone.utc,
 )
 

@@ -11,7 +11,8 @@ class Distribution(dict):
     def __init__(self, *distributions: Tuple[Any, int]):
         super(Distribution, self).__init__(distributions)
         if sum(self.values()) != 100:
-            raise AttributeError('Sum of weights must sum up to 100')
+            raise AttributeError(
+                f'Sum of weights = {sum(self.values())}, must sum up to 100')
 
     def weights(self):
         return list(self.values())
@@ -85,4 +86,20 @@ TRANSACTIONS_AMOUNT_TIER = Distribution(
     ((501, 2000), 10),
     ((2001, 5000), 10),
     ((5000, 15000), 5),
+)
+
+ACCOUNT_CREATE_YEAR_MONTH = Distribution(
+    ((2019, 1), 2),
+    ((2019, 2), 2),
+    ((2019, 3), 3),
+    ((2019, 4), 3),
+    ((2019, 5), 5),
+    ((2019, 6), 5),
+    ((2019, 7), 8),
+    ((2019, 8), 9),
+    ((2019, 9), 12),
+    ((2019, 10), 12),
+    ((2019, 11), 18),
+    ((2019, 12), 21),
+    # END_DATE = 2020-01-01
 )

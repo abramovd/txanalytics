@@ -11,7 +11,7 @@ from factory.random import randgen, reseed_random
 from .factories import (
     AccountFactory, TransactionFactory,
 )
-from .constants import Output
+from .constants import Output, Direction
 from .models import (
     Account, Transaction,
 )
@@ -43,17 +43,34 @@ class Generator(object):
             yield AccountFactory.build()
 
     @staticmethod
+    def _adjust_txs_for_balance(account_txs: List[Transaction]):
+        balance = 0
+        for tx in sorted(account_txs, key=lambda _tx: _tx.timestamp):
+            next_balance = balance + (
+                tx.amount if tx.direction == Direction.IN
+                else -tx.amount
+            )
+
+            if tx.direction == Direction.OUT and next_balance < 0:
+                assert next_balance == balance - tx.amount
+                adjusted_amount = max(balance - 1, 0)
+                if adjusted_amount == 0:
+                    tx.direction = Direction.IN
+                else:
+                    tx.amount = adjusted_amount
+
     def _generate_transactions_for_accounts(
-            account: Account,
+            self, account: Account,
     ) -> List[Transaction]:
         count_from, count_to = TRANSACTIONS_PER_ACCOUNT_TIER.flip()
         count = randgen.randint(count_from, count_to)
 
-        transactions = TransactionFactory.build_batch(
-            count, account=account,
+        account_transactions = TransactionFactory.build_batch(
+            count,
+            account=account,
         )
-
-        return transactions
+        self._adjust_txs_for_balance(account_txs=account_transactions)
+        return account_transactions
 
     def generate_transactions(
             self, accounts: List[Account],

@@ -9,7 +9,7 @@ services:
     ports:
       - "8022:8000"
     environment:
-      - DATASET_FILE_PATH=/datasets/1000_123_final.json
+      - DATASET_FILE_PATH=/datasets/3000_123_final.json
       - USERS_DB_FILE_PATH=/storage/users_db.dat
       - DEBUG=1
       - DEFAULT_PAGE_LIMIT=500
