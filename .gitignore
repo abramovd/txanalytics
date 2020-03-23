@@ -132,4 +132,4 @@ cobertura.xml
 notebook/work/*
 datasets/*
 !datasets/*_final.json
-!notebook/work/template.ipynb
+!notebook/work/workshop_template.ipynb
