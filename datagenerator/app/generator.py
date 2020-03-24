@@ -43,21 +43,34 @@ class Generator(object):
             yield AccountFactory.build()
 
     @staticmethod
-    def _adjust_txs_for_balance(account_txs: List[Transaction]):
+    def _adjust_txs_for_balance(
+            account_txs: List[Transaction]
+    ) -> List[TransactionFactory]:
         balance = 0
+        txs = []
         for tx in sorted(account_txs, key=lambda _tx: _tx.timestamp):
             next_balance = balance + (
                 tx.amount if tx.direction == Direction.IN
                 else -tx.amount
             )
-
             if tx.direction == Direction.OUT and next_balance < 0:
                 assert next_balance == balance - tx.amount
                 adjusted_amount = max(balance - 1, 0)
                 if adjusted_amount == 0:
-                    tx.direction = Direction.IN
+                    # creating a new IN transaction instead
+                    tx = TransactionFactory(
+                        account=tx.account,
+                        timestamp=tx.timestamp,
+                        direction=Direction.IN
+                    )
                 else:
                     tx.amount = adjusted_amount
+            balance += (
+                tx.amount if tx.direction == Direction.IN
+                else -tx.amount
+            )
+            txs.append(tx)
+        return txs
 
     def _generate_transactions_for_accounts(
             self, account: Account,
@@ -69,7 +82,9 @@ class Generator(object):
             count,
             account=account,
         )
-        self._adjust_txs_for_balance(account_txs=account_transactions)
+        account_transactions = self._adjust_txs_for_balance(
+            account_txs=account_transactions,
+        )
         return account_transactions
 
     def generate_transactions(

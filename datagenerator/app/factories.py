@@ -14,17 +14,30 @@ from .models import (
 from .constants import END_DATE, Direction
 from .distributions import (
     ATTACHMENT_FORMAT, ATTACHMENT_ACTIVE,
-    TRANSACTION_DIRECTION, TRANSACTION_TYPE,
+    TRANSACTION_DIRECTION, TRANSACTION_TYPE_OUT, TRANSACTION_TYPE_IN,
     TRANSACTIONS_AMOUNT_TIER,
     ATTACHMENT_ADDED_SECONDS_AFTER_TRANSACTION_TIER,
+    CATEGORY_ADDED_SECONDS_AFTER_TRANSACTION_TIER,
     ATTACHMENT_COUNT_PER_TRANSACTION,
     ACCOUNT_CREATE_YEAR_MONTH,
+    CATEGORY_OUT, CATEGORY_IN,
+    VAT_RATE,
 )
 
 
 def get_attachment_added_at(transaction: Transaction) -> datetime.datetime:
     low_sec, high_sec = \
         ATTACHMENT_ADDED_SECONDS_AFTER_TRANSACTION_TIER.flip()
+    seconds = FuzzyInteger(low_sec, high_sec).fuzz()
+    return FuzzyDateTime(
+        start_dt=transaction.timestamp,
+        end_dt=transaction.timestamp + datetime.timedelta(seconds=seconds)
+    ).fuzz()
+
+
+def get_category_added_at(transaction: Transaction) -> datetime.datetime:
+    low_sec, high_sec = \
+        CATEGORY_ADDED_SECONDS_AFTER_TRANSACTION_TIER.flip()
     seconds = FuzzyInteger(low_sec, high_sec).fuzz()
     return FuzzyDateTime(
         start_dt=transaction.timestamp,
@@ -86,9 +99,14 @@ class TransactionFactory(factory.Factory):
     )
     direction = FuzzyDistributedChoice(TRANSACTION_DIRECTION)
 
-    # TODO: type and direction should be correlated,
-    # e.g. TopUp and OnlineStorePurchase should be only Inbound
-    type = FuzzyDistributedChoice(TRANSACTION_TYPE)
+    type = factory.LazyAttribute(
+        lambda o: FuzzyDistributedChoice(
+            TRANSACTION_TYPE_OUT if o.direction == Direction.OUT
+            else TRANSACTION_TYPE_IN
+        ).fuzz()
+    )
+
+    vat_rate = FuzzyDistributedChoice(VAT_RATE)
 
     @factory.post_generation
     def generate_attachments(transaction, create, extracted, **kwargs):
@@ -102,4 +120,20 @@ class TransactionFactory(factory.Factory):
         transaction.attachments = attachments
         return attachments
 
-    # TODO: vat_rate, category
+    @factory.post_generation
+    def generate_category(transaction, create, extracted, **kwargs):
+        if transaction.direction == Direction.OUT:
+            category_id, category_name = CATEGORY_OUT.flip()
+        else:
+            category_id, category_name = CATEGORY_IN.flip()
+
+        if category_name is None:
+            return
+
+        category = Category(
+            id=category_id,
+            name=category_name,
+            added_at=get_category_added_at(transaction),
+        )
+        transaction.category = category
+        return category

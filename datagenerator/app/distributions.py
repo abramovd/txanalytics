@@ -2,7 +2,10 @@ from typing import Tuple, Any
 
 from factory.random import randgen
 
-from .constants import AttachmentFormat, Direction, TransactionType
+from .constants import (
+    AttachmentFormat, Direction, TransactionType,
+    CategoryIn, CategoryOut, VatRate,
+)
 
 
 class Distribution(dict):
@@ -47,7 +50,7 @@ ATTACHMENT_COUNT_PER_TRANSACTION = Distribution(
     (4, 5),
 )
 
-_ONE_HOUR = 3600 # sec
+_ONE_HOUR = 3600  # sec
 ATTACHMENT_ADDED_SECONDS_AFTER_TRANSACTION_TIER = Distribution(
     ((1, 9), 10),
     ((10, 60), 20),
@@ -57,16 +60,28 @@ ATTACHMENT_ADDED_SECONDS_AFTER_TRANSACTION_TIER = Distribution(
     ((_ONE_HOUR * 24 + 1, _ONE_HOUR * 24 * 30), 15),
 )
 
-TRANSACTION_DIRECTION = Distribution(
-    (Direction.IN, 60),
-    (Direction.OUT, 40),
+CATEGORY_ADDED_SECONDS_AFTER_TRANSACTION_TIER = Distribution(
+    ((1, 9), 20),
+    ((10, 60), 30),
+    ((61, 300), 25),
+    ((31, _ONE_HOUR * 24), 25),
 )
 
-TRANSACTION_TYPE = Distribution(
-    (TransactionType.Card, 45),
-    (TransactionType.BankTransfer, 35),
-    (TransactionType.TopUp, 15),
-    (TransactionType.OnlineStorePurchase, 5),
+TRANSACTION_DIRECTION = Distribution(
+    (Direction.IN, 40),
+    (Direction.OUT, 60),
+)
+
+TRANSACTION_TYPE_OUT = Distribution(
+    (TransactionType.Card, 70),
+    (TransactionType.BankTransfer, 30),
+)
+
+TRANSACTION_TYPE_IN = Distribution(
+    (TransactionType.BankTransfer, 60),
+    (TransactionType.TopUp, 22),
+    (TransactionType.Card, 3),  # card refunds
+    (TransactionType.OnlineStorePurchase, 15),
 )
 
 TRANSACTIONS_PER_ACCOUNT_TIER = Distribution(
@@ -102,4 +117,33 @@ ACCOUNT_CREATE_YEAR_MONTH = Distribution(
     ((2019, 11), 18),
     ((2019, 12), 21),
     # END_DATE = 2020-01-01
+)
+
+CATEGORY_OUT = Distribution(
+    (CategoryOut.GeneralExpense, 13),
+    (CategoryOut.Office, 12),
+    (CategoryOut.Personal, 12),
+    (CategoryOut.Contract, 8),
+    (CategoryOut.Telecom, 8),
+    (CategoryOut.Tax, 8),
+    (CategoryOut.Salary, 6),
+    (CategoryOut.MealsEntertainment, 5),
+    (CategoryOut.Marketing, 5),
+    (CategoryOut.Insurance, 4),
+    (CategoryOut.Rent, 4),
+    ((None, None), 15),
+)
+
+CATEGORY_IN = Distribution(
+    (CategoryIn.GeneralIncome, 50),
+    (CategoryIn.Personal, 30),
+    ((None, None), 20),
+)
+
+VAT_RATE = Distribution(
+    (VatRate.P0, 40),
+    (VatRate.P10, 6),
+    (VatRate.P14, 4),
+    (VatRate.P24, 30),
+    (None, 20),
 )
