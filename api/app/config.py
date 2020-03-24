@@ -7,7 +7,6 @@ DEBUG = config('DEBUG', cast=bool, default=False)
 ALLOWED_ORIGINS = config(
     'ALLOWED_ORIGINS', default='*')
 SECRET_KEY = config('SECRET_KEY', cast=Secret, default='test_secret')
-LOCAL_PORT = config('LOCAL_PORT', default=8022)
+LOCAL_PORT = config('PORT', default=8000)
 DATASET_FILE_PATH = config('DATASET_FILE_PATH')
-USERS_DB_FILE_PATH = config('USERS_DB_FILE_PATH')
 DEFAULT_PAGE_LIMIT = config('DEFAULT_PAGE_LIMIT', cast=int, default=1000)

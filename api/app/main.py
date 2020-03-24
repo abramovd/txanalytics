@@ -5,10 +5,9 @@ from starlette.middleware.cors import CORSMiddleware
 from starlette.responses import Response
 
 from config import (
-    DEBUG, ALLOWED_ORIGINS
+    DEBUG, ALLOWED_ORIGINS, LOCAL_PORT
 )
 from routers import transactions
-from storages import initialize_users_storage
 from storages import initialize_transactions_storage
 
 
@@ -23,7 +22,7 @@ app = FastAPI(
 )
 app.add_middleware(
     CORSMiddleware, allow_methods=['OPTIONS', 'GET', ],
-    allow_origins=ALLOWED_ORIGINS,
+    allow_origins=ALLOWED_ORIGINS.split(','),
 )
 app.debug = DEBUG
 app.include_router(
@@ -34,7 +33,6 @@ app.include_router(
 
 @app.on_event("startup")
 async def startup_event():
-    initialize_users_storage()
     initialize_transactions_storage()
 
 
@@ -44,4 +42,4 @@ def health_check():
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=LOCAL_PORT)

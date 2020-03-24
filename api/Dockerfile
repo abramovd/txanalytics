@@ -30,12 +30,7 @@ FROM dev-base As local
 USER api
 CMD ["uvicorn", "main:app", "--reload", "--host=0.0.0.0", "--port=8000"]
 
-FROM dev-base as test
-USER api
-RUN pip install -r /requirements/test.txt --no-deps
-CMD ["pytest"]
-
 FROM release As prod
 USER api
-CMD ["uvicorn", "app.main:app", "--workers=4", "--host=0.0.0.0", "--port=8000"]
+CMD ["uvicorn", "main:app", "--workers=2", "--host=0.0.0.0", "--port=8000"]
 
