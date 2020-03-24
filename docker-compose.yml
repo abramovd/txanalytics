@@ -9,9 +9,10 @@ services:
     ports:
       - "8022:8000"
     environment:
-      - DATASET_FILE_PATH=/datasets/3000_123_final.json
+      - DATASET_FILE_PATH=/datasets/3000_123_2020-03-24T21:33:50.json
       - DEBUG=1
       - DEFAULT_PAGE_LIMIT=500
+      - PORT=8000
     volumes:
       - ./api/app/:/app/
       - ./datasets/:/datasets/
